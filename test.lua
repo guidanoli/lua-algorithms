@@ -14,13 +14,10 @@ end
 
 local testbenchtotalresults = newResultsTable("Total")
 
-print('> Running tests')
-print()
-
 -- sums r1 and r2 counts into r1
 local function sumResultsCounts(r1, r2)
-    for _, field in pairs{'passed', 'failed', 'total'} do
-        field = field .. 'cnt'
+    for _, field in pairs{"passed", "failed", "total"} do
+        field = field .. "cnt"
         r1[field] = r1[field] + r2[field]
     end
 end
@@ -30,6 +27,13 @@ local function pcallMethod(testfunction, testbench)
     return xpcall(testmethod, debug.traceback)
 end
 
+local LINEW = 80
+
+local function printTestResultMessage(testbenchname, testname, message)
+    local n = math.max(0, LINEW - 2 - testbenchname:len() - testname:len() - message:len())
+    print(string.format("%s.%s%s %s", testbenchname, testname, string.rep(".", n), message))
+end
+
 for testbenchindex, testbenchname in ipairs(testbenches) do
     local testbench = require(testbenchname)
     local testbenchresult = newResultsTable(testbenchname)
@@ -37,10 +41,10 @@ for testbenchindex, testbenchname in ipairs(testbenches) do
         local ok, err = pcallMethod(testfunction, testbench)
         local testresult = {name = testname, ok = ok, err = err}
         if ok then
-            print(string.format('%s.%-20s | PASS', testbenchname, testname))
+            printTestResultMessage(testbenchname, testname, "PASS")
             testbenchresult.passedcnt = testbenchresult.passedcnt + 1
         else
-            print(string.format('%s.%-20s | FAIL', testbenchname, testname))
+            printTestResultMessage(testbenchname, testname, "FAIL")
             testbenchresult.failedcnt = testbenchresult.failedcnt + 1
         end
         testbenchresult.totalcnt = testbenchresult.totalcnt + 1
@@ -51,11 +55,22 @@ for testbenchindex, testbenchname in ipairs(testbenches) do
 end
 
 print()
-print('> Printing summary')
-print()
+
+local NCOLUMNS = 4
+local COLUMNW = math.floor((LINEW - 3 * (NCOLUMNS - 1)) / NCOLUMNS)
+local MCOLUMNW = LINEW - 3 * (NCOLUMNS - 1) - 3 * COLUMNW
+local COLUMNS = {}
+
+if NCOLUMNS > 1 then
+    COLUMNS[1] = MCOLUMNW
+    for i = 2, NCOLUMNS do
+        COLUMNS[i] = COLUMNW
+    end
+end
 
 local function printTableRow(...)
-    print(string.format('%-20s | %-20s | %-20s | %-20s', ...))
+    local fmt = string.format('%%-%ds | %%-%ds | %%-%ds | %%-%ds', table.unpack(COLUMNS))
+    print(string.format(fmt, ...))
 end
 
 local function printTableRowFromResults(results)
@@ -67,41 +82,39 @@ end
 
 local function printTableLine()
     local t = {}
-    for i = 1, 4 do
-        t[i] = string.rep('-', 20)
+    for i, col in ipairs(COLUMNS) do
+        t[i] = string.rep("-", col)
     end
     printTableRow(table.unpack(t))
 end
 
-printTableRow('Testbench', 'Passed', 'Failed', 'Total')
+printTableLine()
+printTableRow("Testbench", "Passed", "Failed", "Total")
 printTableLine()
 for testbenchindex, testbenchresult in ipairs(testbenchresults) do
     printTableRowFromResults(testbenchresult)
     printTableLine()
 end
 printTableRowFromResults(testbenchtotalresults)
-
-print()
-print('> Printing errors')
-print()
+printTableLine()
 
 local function printDetailsHeader(testbenchname, testname)
-    local n = math.max(0, 80 - testbenchname:len() - testname:len())
+    local n = math.max(0, LINEW - 3 - testbenchname:len() - testname:len())
     local left = math.floor(n/2)
     local right = n - left
-    print(string.format('%s %s.%s %s', string.rep('=', left),
+    print(string.format("%s %s.%s %s", string.rep("=", left),
                                        testbenchname,
                                        testname,
-                                       string.rep('=', right)))
+                                       string.rep("=", right)))
 end
 
 for testbenchindex, testbenchresult in ipairs(testbenchresults) do
     for testindex, testresult in ipairs(testbenchresult) do
         if not testresult.ok then
+            print()
             printDetailsHeader(testbenchresult.name, testresult.name)
             print()
             print(testresult.err)
-            print()
         end
     end
 end
