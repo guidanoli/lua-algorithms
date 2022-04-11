@@ -109,7 +109,7 @@ end
 -- Exit with error code 1 if there is a test fails
 for testbenchindex, testbenchresult in ipairs(testbenchresults) do
     for testindex, testresult in ipairs(testbenchresult) do
-        if not test.result.ok then
+        if not testresult.ok then
             os.exit(1)
         end
     end

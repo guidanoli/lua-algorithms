@@ -6,28 +6,26 @@ local Select = {}
 -- Public functions
 -----------------------
 
--- Selects minimum of A
+-- Selects minimum value in A
 -- If A is empty, returns nil
--- If A has NaN, results vary
+-- Ignores NaN entirely
 function Select:minimum(A)
-    local min = A[1]
-    for i = 2, #A do
-        local a = A[i]
-        if min > a then
+    local min
+    for _, a in ipairs(A) do
+        if (a == a) and ((min == nil) or (a < min)) then
             min = a
         end
     end
     return min
 end
 
--- Selects maximum of A
+-- Selects maximum value in A
 -- If A is empty, returns nil
--- If A has NaN, results vary
+-- Ignores NaN entirely
 function Select:maximum(A)
-    local max = A[1]
-    for i = 2, #A do
-        local a = A[i]
-        if max < a then
+    local max
+    for _, a in ipairs(A) do
+        if (a == a) and ((max == nil) or (a > max)) then
             max = a
         end
     end
