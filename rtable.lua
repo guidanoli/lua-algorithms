@@ -10,4 +10,8 @@ function RandomTable:new(n, max)
     return t
 end
 
+-----------------------
+-- Return module
+-----------------------
+
 return RandomTable

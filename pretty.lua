@@ -59,4 +59,8 @@ function Pretty:_formatNonTable(o, indentStr)
     end
 end
 
+-----------------------
+-- Return module
+-----------------------
+
 return Pretty

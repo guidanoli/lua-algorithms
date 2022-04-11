@@ -135,4 +135,8 @@ function Select:_randomizedSelect(A, p, r, i)
     end
 end
 
+-----------------------
+-- Return module
+-----------------------
+
 return Select
