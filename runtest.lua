@@ -1,6 +1,13 @@
 -- Run tests
 
-local testbenches = require "testbenches"
+function assertpcall(patt, f, ...)
+    local ok, ret = pcall(f, ...)
+    assert(not ok, "function did not throw")
+    local reason = ("%q not in %q"):format(patt, ret)
+    assert(ret:find(patt, 1, true), reason)
+end
+
+local testbenches = require "test.benches"
 local testbenchresults = {}
 
 local function newResultsTable(name)

@@ -1,6 +1,14 @@
 -- Random table
 
+-----------------------
+-- Define module
+-----------------------
+
 local RandomTable = {}
+
+-----------------------
+-- Public functions
+-----------------------
 
 function RandomTable:new(n, max)
     local t = {}
@@ -9,6 +17,10 @@ function RandomTable:new(n, max)
     end
     return t
 end
+
+-----------------------
+-- Private functions
+-----------------------
 
 -----------------------
 -- Return module

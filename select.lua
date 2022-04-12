@@ -1,5 +1,9 @@
 -- Selection Algorithms
 
+-----------------------
+-- Define module
+-----------------------
+
 local Select = {}
 
 -----------------------

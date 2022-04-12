@@ -1,5 +1,9 @@
 -- Pretty printer
 
+-----------------------
+-- Define module
+-----------------------
+
 local Pretty = {
     INDENTING_STRING = "  "
 }
