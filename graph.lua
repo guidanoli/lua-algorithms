@@ -115,6 +115,50 @@ function Graph:iterEdges(v)
     end
 end
 
+-- Do a depth-first search on the graph
+-- Return a DFS forest where each vertex
+-- and edge has a field called "ref" that
+-- points to the original in the graph,
+-- and where each vertex has a field called
+-- "cid" with serial number indicating the
+-- connected component the vertex is in.
+-- Return values
+--   [1] : Graph - DFS forest
+function Graph:dfs()
+    local visited = {}
+    local forest = Graph:new()
+    for v in self:iterVertices() do
+        if not visited[v] then
+            local fv = forest:addVertex()
+            self:_dfs(v, fv, visited, forest)
+        end
+    end
+    return forest
+end
+
+-----------------------
+-- Private functions
+-----------------------
+
+-- Visit vertex `v` in a depth-first search
+-- Parameters
+--   v : Vertex
+--   fv : Vertex - vertex in `forest` that references `v`
+--   visited : (Vertex -> bool)
+--   forest : Graph - DFS forest
+function Graph:_dfs(v, fv, visited, forest)
+    fv.ref = v
+    visited[v] = true
+    for w, e in self:iterEdges(v) do
+        if not visited[w] then
+            local fw = forest:addVertex()
+            local fe = forest:addEdge(fv, fw)
+            fe.ref = e
+            self:_dfs(w, fw, visited, forest)
+        end
+    end
+end
+
 -----------------------
 -- Return class
 -----------------------

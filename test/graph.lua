@@ -109,4 +109,41 @@ function t:removeDestinationVertex()
     assertnoedges(g, v, w)
 end
 
+function t:dfs()
+    local g = Graph:new()
+    local n = 10
+    for i = 1, n do
+        local v = g:addVertex()
+        v.id = i
+    end
+    for v in g:iterVertices() do
+        for w in g:iterVertices() do
+            if v.id < w.id then
+                local e = g:addEdge(v, w)
+            end
+        end
+    end
+    local forest = assert(g:dfs())
+    local fn = 0
+    for fv in forest:iterVertices() do
+        local v = assert(fv.ref)
+        assert(g:hasVertex(v))
+        assert(not v.traversed)
+        v.traversed = true
+        fn = fn + 1
+    end
+    assert(fn == n)
+    for fv in forest:iterVertices() do
+        local v = fv.ref
+        for fw in forest:iterVertices() do
+            local w = fw.ref
+            local fe = forest:getEdge(fv, fw)
+            local e = g:getEdge(v, w)
+            if fe ~= nil then
+                assert(fe.ref == e)
+            end
+        end
+    end
+end
+
 return t
