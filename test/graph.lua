@@ -175,4 +175,48 @@ function t:dfs()
     end
 end
 
+function t:dfs()
+    local g = Graph:new()
+    local n = 10
+    for i = 1, n do
+        local v = g:addVertex()
+        v.id = i
+    end
+    for v in g:iterVertices() do
+        for w in g:iterVertices() do
+            if v.id < w.id then
+                local e = g:addEdge(v, w)
+            end
+        end
+    end
+
+    -- Do a DFS in the graph
+    local forest = assert(g:dfs())
+
+    -- Check that every vertex in the forest has
+    -- a reference to a vertex in the graph and
+    -- that every vertex in the graph is referenced
+    -- in exactly one vertex in the forest
+    local fn = 0
+    for fv in forest:iterVertices() do
+        local v = assert(fv.ref)
+        assert(g:hasVertex(v))
+        assert(not v.traversed)
+        v.traversed = true
+        fn = fn + 1
+    end
+    assert(fn == n)
+
+    -- Check that every edge in the forest
+    -- references an edge in the graph
+    for fv in forest:iterVertices() do
+        local v = fv.ref
+        for fw, fe in forest:iterEdges(fv) do
+            local w = fw.ref
+            local e = g:getEdge(v, w)
+            assert(fe.ref == e)
+        end
+    end
+end
+
 return t

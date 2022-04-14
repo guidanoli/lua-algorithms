@@ -4,6 +4,7 @@ local Object = require "object"
 local Vertex = require "vertex"
 local Edge = require "edge"
 local Neighbourhood = require "neighbourhood"
+local Queue = require "queue"
 
 -----------------------
 -- Class
@@ -148,6 +149,36 @@ function Graph:dfs()
         end
     end
     return forest, ncomponents
+end
+
+-- Do a breadth-first search on the graph
+-- Returns a BFS forest
+function Graph:bfs()
+    local visited = {}
+    local queue = Queue:new()
+    local forest = Graph:new()
+    for u in self:iterVertices() do
+        if not visited[u] then
+            local fu = forest:addVertex()
+            fu.ref = u
+            queue:enqueue(u)
+            visited[u] = true
+            while not queue:isEmpty() do
+                u = queue:dequeue()
+                for v, uv in self:iterEdges(u) do
+                    if not visited[v] then
+                        local fv = forest:addVertex()
+                        fv.ref = v
+                        local fuv = forest:addEdge(fu, fv)
+                        fuv.ref = uv
+                        visited[v] = true
+                        queue:enqueue(v)
+                    end
+                end
+            end
+        end
+    end
+    return forest
 end
 
 -----------------------
