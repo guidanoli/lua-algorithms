@@ -9,7 +9,8 @@ function t:badArguments()
     assert(g:addEdge(nil, nil) == nil)
     assert(g:getEdge(nil, nil) == nil)
     g:removeEdge(nil, nil)
-    assertnoloop(g:iterEdges(nil))
+    assertnoloop(g:iterInEdges(nil))
+    assertnoloop(g:iterOutEdges(nil))
 
     local v = g:addVertex()          -- G = <{v}, {}>
     assert(g:addEdge(v, nil) == nil)
@@ -40,8 +41,10 @@ function t:addAndRemoveVertex()
 end
 
 local function assertnoedges(g, v, w)
-    assertnoloop(g:iterEdges(v))
-    assertnoloop(g:iterEdges(w))
+    assertnoloop(g:iterOutEdges(v))
+    assertnoloop(g:iterInEdges(v))
+    assertnoloop(g:iterOutEdges(w))
+    assertnoloop(g:iterInEdges(w))
     assert(g:getEdge(v, w) == nil)
     assert(g:getEdge(w, v) == nil)
 end
@@ -50,7 +53,8 @@ function t:addAndRemoveEdge()
     local g = Graph:new()            -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
-    assertnoloop(g:iterEdges(v))
+    assertnoloop(g:iterOutEdges(v))
+    assertnoloop(g:iterInEdges(v))
 
     local w = g:addVertex()          -- G = <{v, w}, {}>
     assert(v ~= w)
@@ -60,14 +64,23 @@ function t:addAndRemoveEdge()
     assert(g:getEdge(v, w) == e)
     assert(g:getEdge(w, v) == nil)
     local found = false
-    for _w, _e in g:iterEdges(v) do
+    for _w, _e in g:iterOutEdges(v) do
         assert(not found)
         assert(_w == w)
         assert(_e == e)
         found = true
     end
     assert(found)
-    assertnoloop(g:iterEdges(w))
+    found = false
+    for _v, _e in g:iterInEdges(w) do
+        assert(not found)
+        assert(_v == v)
+        assert(_e == e)
+        found = true
+    end
+    assert(found)
+    assertnoloop(g:iterInEdges(v))
+    assertnoloop(g:iterOutEdges(w))
 
     g:removeEdge(v, w)                -- G = <{v, w}, {}>
     assertnoedges(g, v, w)

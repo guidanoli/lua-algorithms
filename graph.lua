@@ -10,6 +10,9 @@ local Neighbourhood = require "neighbourhood"
 -- Vertex : (any -> any)
 local Vertex = Object:inherit "Vertex"
 
+-- Edge : (any -> any)
+local Edge = Object:inherit "Edge"
+
 -- Graph : (Vertex -> Neighbourhood)
 local Graph = Object:inherit "Graph"
 
@@ -17,12 +20,18 @@ local Graph = Object:inherit "Graph"
 -- Public functions
 -----------------------
 
+function Graph:constructor()
+    self.from = {}
+    self.to = {}
+end
+
 -- Add a new vertex to the graph
 -- Return values
 --   [1] : Vertex
 function Graph:addVertex()
     local v = Vertex:new()
-    self[v] = Neighbourhood:new()
+    self.from[v] = Neighbourhood:new()
+    self.to[v] = Neighbourhood:new()
     return v
 end
 
@@ -32,18 +41,22 @@ end
 -- Return values
 --   [1] : bool
 function Graph:hasVertex(v)
-    return self[v] ~= nil
+    return self.from[v] ~= nil
 end
 
 -- Remove vertex `v` from the graph
 -- Parameters
 --   v   : Vertex
 function Graph:removeVertex(v)
-    if self[v] then
-        for _, wn in pairs(self) do
+    if self.from[v] then
+        for _, wn in pairs(self.from) do
             wn:removeEdge(v)
         end
-        self[v] = nil
+        for _, wn in pairs(self.to) do
+            wn:removeEdge(v)
+        end
+        self.from[v] = nil
+        self.to[v] = nil
     end
 end
 
@@ -53,23 +66,27 @@ end
 function Graph:iterVertices()
     local v
     return function()
-        v = next(self, v)
+        v = next(self.from, v)
         return v
     end
 end
 
 -- Add edge from vertex `v` to vertex `w`
--- Returns nil if one of the vertices is not in the graph
--- or if such edge already exists in the graph
+-- If `v` or `w` don't exist, returns nil
+-- If edge already exists, is is overwritten
 -- Parameters
 --   v  : Vertex
 --   w  : Vertex
 -- Return values
 --   [1] : Edge
 function Graph:addEdge(v, w)
-    local vn = self[v]
-    if vn and self[w] then
-        return vn:addEdge(w)
+    local fromv = self.from[v]
+    local tow = self.to[w]
+    if fromv and tow then
+        local e = Edge:new()
+        fromv:setEdge(w, e)
+        tow:setEdge(v, e)
+        return e
     end
 end
 
@@ -82,7 +99,7 @@ end
 -- Return values
 --   [1] : Edge
 function Graph:getEdge(v, w)
-    local vn = self[v]
+    local vn = self.from[v]
     if vn then
         return vn:getEdge(w)        
     end
@@ -93,21 +110,39 @@ end
 --   v  : Vertex
 --   w  : Vertex
 function Graph:removeEdge(v, w)
-    local vn = self[v]
-    if vn and self[w] then
-        vn:removeEdge(w)
+    local fromv = self.from[v]
+    local tow = self.to[w]
+    if fromv and tow then
+        fromv:removeEdge(w)
+        tow:removeEdge(v)
     end
 end
 
--- Iterate through all the edges and the vertices they
--- connect `v` to
+-- Iterate through all the out-edges and out-neighbours of vertex `v`
+-- If `v` is not in the graph, makes no iteration
 -- Parameters
 --   v   : Vertex
 -- Yielded values
 --   [1] : Vertex
 --   [2] : Edge
-function Graph:iterEdges(v)
-    local vn = self[v]
+function Graph:iterOutEdges(v)
+    local vn = self.from[v]
+    if vn then
+        return vn:iter()
+    else
+        return getmetatable -- noop
+    end
+end
+
+-- Iterate through all the in-edges and in-neighbours of vertex `v`
+-- If `v` is not in the graph, makes no iteration
+-- Parameters
+--   v   : Vertex
+-- Yielded values
+--   [1] : Vertex
+--   [2] : Edge
+function Graph:iterInEdges(v)
+    local vn = self.to[v]
     if vn then
         return vn:iter()
     else
@@ -121,7 +156,7 @@ end
 -- points to the original in the graph,
 -- and where each vertex has a field called
 -- "cid" with serial number indicating the
--- connected component the vertex is in.
+-- strongly connected component it is in.
 -- Return values
 --   [1] : Graph - DFS forest
 function Graph:dfs()
@@ -149,7 +184,7 @@ end
 function Graph:_dfs(v, fv, visited, forest)
     fv.ref = v
     visited[v] = true
-    for w, e in self:iterEdges(v) do
+    for w, e in self:iterOutEdges(v) do
         if not visited[w] then
             local fw = forest:addVertex()
             local fe = forest:addEdge(fv, fw)

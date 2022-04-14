@@ -6,9 +6,6 @@ local Object = require "object"
 -- Class
 -----------------------
 
--- Edge : (any -> any)
-local Edge = Object:inherit "Edge"
-
 -- Neighbourhood : (Vertex -> Edge)
 local Neighbourhood = Object:inherit "Neighbourhood"
 
@@ -16,18 +13,11 @@ local Neighbourhood = Object:inherit "Neighbourhood"
 -- Public functions
 -----------------------
 
--- Add edge to vertex `w`
--- Returns nil if such edge already exists
+-- Set edge to vertex `w`
 -- Parameters
 --   w  : Vertex
--- Return values
---   [1] : Edge
-function Neighbourhood:addEdge(w)
-    if self[w] == nil then
-        local e = Edge:new()
-        self[w] = e
-        return e
-    end
+function Neighbourhood:setEdge(w, e)
+    self[w] = e
 end
 
 -- Remove edge to `w`
