@@ -1,5 +1,11 @@
 -- Run tests
 
+function assertnoloop(...)
+    for _ in ... do
+        assert(false, "looped")
+    end
+end
+
 function assertpcall(patt, f, ...)
     local ok, ret = pcall(f, ...)
     assert(not ok, "function did not throw")

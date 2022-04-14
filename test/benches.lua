@@ -1,6 +1,7 @@
 -- Test benches
 
 return {
-    "test.select",
+    "test.object",
     "test.graph",
+    "test.select",
 }

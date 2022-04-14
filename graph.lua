@@ -1,99 +1,118 @@
--- Generic Graph
+-- Directed Graph with Self-Loops
 
-local Class = require "class"
+local Object = require "object"
+local Neighbourhood = require "neighbourhood"
 
 -----------------------
--- Define class
+-- Class
 -----------------------
 
--- EdgeData : table
--- VertexData : table
--- VertexHandle : (VertexHandle -> EdgeData)
--- Graph : (VertexHandle -> VertexData)
-local Graph = Class:new{
-    __name = "Graph",
-}
+-- Vertex : (any -> any)
+local Vertex = Object:inherit "Vertex"
+
+-- Graph : (Vertex -> Neighbourhood)
+local Graph = Object:inherit "Graph"
 
 -----------------------
 -- Public functions
 -----------------------
 
--- Create a new vertex and add it to the graph
+-- Add a new vertex to the graph
 -- Return values
---   [1] : table - vertex handle
---   [2] : table - vertex data
+--   [1] : Vertex
 function Graph:addVertex()
-    local v = {}
-    local vdata = {}
-    self[v] = vdata
-    return v, vdata
+    local v = Vertex:new()
+    self[v] = Neighbourhood:new()
+    return v
 end
 
--- Iterate through all vertices in the graph
--- Yielded values
---   [1] : table - vertex handle
---   [2] : table - vertex data
-function Graph:iterVertices()
-    return pairs(self)
-end
-
--- Get data from vertex `v`
--- Returns nil if `v` is not in the graph
+-- Check if vertex exists in graph
 -- Parameters
---   v   : table  - vertex handle
+--   v   : Vertex
 -- Return values
---   [1] : table? - vertex data
-function Graph:getVertex(v)
-    return self[v]
+--   [1] : bool
+function Graph:hasVertex(v)
+    return self[v] ~= nil
 end
 
 -- Remove vertex `v` from the graph
 -- Parameters
---   v   : table - vertex handle
--- Return values
---   [1] : bool  - vertex is removed
+--   v   : Vertex
 function Graph:removeVertex(v)
-    assert(self:getVertex(v), "v is not in the graph")
-    for w in pairs(self) do
-        w[v] = nil
+    if self[v] then
+        for _, wn in pairs(self) do
+            wn:removeEdge(v)
+        end
+        self[v] = nil
     end
-    self[v] = nil
 end
 
--- Add edge going from `v1` to `v2`
+-- Iterate through all the vertices
+-- Yielded values
+--   [1] : Vertex
+function Graph:iterVertices()
+    local v
+    return function()
+        v = next(self, v)
+        return v
+    end
+end
+
+-- Add edge from vertex `v` to vertex `w`
+-- Returns nil if one of the vertices is not in the graph
+-- or if such edge already exists in the graph
 -- Parameters
---   v1  : table - vertex handle
---   v2  : table - vertex handle
+--   v  : Vertex
+--   w  : Vertex
 -- Return values
---   [1] : table - edge data
-function Graph:addEdge(v1, v2)
-    assert(self:getVertex(v1), "v1 is not in the graph")
-    assert(self:getVertex(v2), "v2 is not in the graph")
-    local e = {}
-    v1[v2] = e
-    return e
+--   [1] : Edge
+function Graph:addEdge(v, w)
+    local vn = self[v]
+    if vn and self[w] then
+        return vn:addEdge(w)
+    end
 end
 
--- Get edge going from `v1` to `v2`
--- Returns nil if there is no such edge
+-- Get edge from vertex `v` to vertex `w`
+-- Returns nil if one of the vertices is not in the graph
+-- or if the edge itself doesn't exist
 -- Parameters
---   v1  : table - vertex handle
---   v2  : table - vertex handle
+--   v  : Vertex
+--   w  : Vertex
 -- Return values
---   [1] : table - edge data
-function Graph:getEdge(v1, v2)
-    assert(self:getVertex(v1), "v1 is not in the graph")
-    assert(self:getVertex(v2), "v2 is not in the graph")
-    return v1[v2]
+--   [1] : Edge
+function Graph:getEdge(v, w)
+    local vn = self[v]
+    if vn then
+        return vn:getEdge(w)        
+    end
 end
 
--- Iterate through all neighbours of vertex `v`
--- Yields
---   [1] : table - neighbouring vertex handle
---   [2] : table - neighbouring edge data
-function Graph:iterNeighbours(v)
-    assert(self:getVertex(v), "v is not in the graph")
-    return pairs(v)
+-- Remove edge from vertex `v` to vertex `w`
+-- Parameters
+--   v  : Vertex
+--   w  : Vertex
+function Graph:removeEdge(v, w)
+    local vn = self[v]
+    if vn and self[w] then
+        vn:removeEdge(w)
+    end
+end
+
+-- Iterate through all the edges and the vertices they
+-- connect `v` to
+-- Parameters
+--   v   : Vertex
+-- Yielded values
+--   [1] : Vertex
+--   [2] : Edge
+function Graph:iterEdges(v)
+    local vn = self[v]
+    if vn then
+        return vn:iter()
+    else
+        return getmetatable -- noop
+    end
 end
 
 -----------------------
