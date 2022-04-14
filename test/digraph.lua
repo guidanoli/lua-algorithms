@@ -1,15 +1,16 @@
-local Graph = require "graph"
+local DirectedGraph = require "digraph"
 
 local t = {}
 
 function t:badArguments()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = DirectedGraph:new()            -- G = <V, E> = <{}, {}>
     assert(g:hasVertex(nil) == false)
     g:removeVertex(nil)
     assert(g:addEdge(nil, nil) == nil)
     assert(g:getEdge(nil, nil) == nil)
     g:removeEdge(nil, nil)
-    assertnoloop(g:iterEdges(nil))
+    assertnoloop(g:iterInEdges(nil))
+    assertnoloop(g:iterOutEdges(nil))
 
     local v = g:addVertex()          -- G = <{v}, {}>
     assert(g:addEdge(v, nil) == nil)
@@ -21,30 +22,39 @@ function t:badArguments()
 end
 
 function t:addAndRemoveVertex()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = DirectedGraph:new()            -- G = <V, E> = <{}, {}>
     assertnoloop(g:iterVertices())
     assert(g:hasVertex{} == false)
 
     local v = g:addVertex()          -- G = <{v}, {}>
     assert(g:hasVertex(v) == true)
-    assertloop({{v}}, g:iterVertices())
+    local found = false
+    for u in g:iterVertices() do
+        assert(not found)
+        assert(u == v)
+        found = true
+    end
+    assert(found)
 
     g:removeVertex(v)                -- G = <{}, {}>
     assert(g:hasVertex(v) == false)
 end
 
 local function assertnoedges(g, v, w)
-    assertnoloop(g:iterEdges(v))
-    assertnoloop(g:iterEdges(w))
+    assertnoloop(g:iterOutEdges(v))
+    assertnoloop(g:iterInEdges(v))
+    assertnoloop(g:iterOutEdges(w))
+    assertnoloop(g:iterInEdges(w))
     assert(g:getEdge(v, w) == nil)
     assert(g:getEdge(w, v) == nil)
 end
 
 function t:addAndRemoveEdge()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = DirectedGraph:new()            -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
-    assertnoloop(g:iterEdges(v))
+    assertnoloop(g:iterOutEdges(v))
+    assertnoloop(g:iterInEdges(v))
 
     local w = g:addVertex()          -- G = <{v, w}, {}>
     assert(v ~= w)
@@ -52,9 +62,25 @@ function t:addAndRemoveEdge()
 
     local e = g:addEdge(v, w)        -- G = <{v, w}, {e}>
     assert(g:getEdge(v, w) == e)
-    assert(g:getEdge(w, v) == e)
-    assertloop({{w, e}}, g:iterEdges(v))
-    assertloop({{v, e}}, g:iterEdges(w))
+    assert(g:getEdge(w, v) == nil)
+    local found = false
+    for _w, _e in g:iterOutEdges(v) do
+        assert(not found)
+        assert(_w == w)
+        assert(_e == e)
+        found = true
+    end
+    assert(found)
+    found = false
+    for _v, _e in g:iterInEdges(w) do
+        assert(not found)
+        assert(_v == v)
+        assert(_e == e)
+        found = true
+    end
+    assert(found)
+    assertnoloop(g:iterInEdges(v))
+    assertnoloop(g:iterOutEdges(w))
 
     g:removeEdge(v, w)                -- G = <{v, w}, {}>
     assertnoedges(g, v, w)
@@ -67,7 +93,7 @@ function t:addAndRemoveEdge()
 end
 
 function t:removeOriginVertex()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = DirectedGraph:new()            -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
 
@@ -82,7 +108,7 @@ function t:removeOriginVertex()
 end
 
 function t:removeDestinationVertex()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = DirectedGraph:new()            -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
 
@@ -97,7 +123,7 @@ function t:removeDestinationVertex()
 end
 
 function t:dfs()
-    local g = Graph:new()
+    local g = DirectedGraph:new()
     local n = 10
     for i = 1, n do
         local v = g:addVertex()
@@ -110,17 +136,7 @@ function t:dfs()
             end
         end
     end
-
-    -- Do a DFS in the graph
-    local forest, ncomponents = g:dfs()
-    assert(forest)
-    assert((n == 0 and ncomponents == 0) or
-           (ncomponents >= 1 and ncomponents <= n))
-
-    -- Check that every vertex in the forest has
-    -- a reference to a vertex in the graph and
-    -- that every vertex in the graph is referenced
-    -- in exactly one vertex in the forest
+    local forest = assert(g:dfs())
     local fn = 0
     for fv in forest:iterVertices() do
         local v = assert(fv.ref)
@@ -130,23 +146,6 @@ function t:dfs()
         fn = fn + 1
     end
     assert(fn == n)
-
-    -- Check that every vertex is in a valid
-    -- connected component
-    local components = {}
-    for fv in forest:iterVertices() do
-        local v = fv.ref
-        local cid = assert(fv.cid)
-        assert(cid >= 1 and cid <= ncomponents)
-        if components[cid] == nil then
-            components[cid] = {}
-        end
-        components[cid][v] = true
-    end
-    assert(#components == ncomponents)
-
-    -- Check that vertices that are connected are
-    -- in the same connected component
     for fv in forest:iterVertices() do
         local v = fv.ref
         for fw in forest:iterVertices() do
@@ -155,21 +154,6 @@ function t:dfs()
             local e = g:getEdge(v, w)
             if fe ~= nil then
                 assert(fe.ref == e)
-                assert(fv.cid == fw.cid)
-            end
-        end
-    end
-
-    -- Check that vertices from different connected
-    -- components are not connected with one another
-    for cid1, component1 in pairs(components) do
-        for cid2, component2 in pairs(components) do
-            if cid1 < cid2 then
-                for v1 in pairs(component1) do
-                    for v2 in pairs(component2) do
-                        assert(g:getEdge(v1, v2) == nil)
-                    end
-                end
             end
         end
     end
