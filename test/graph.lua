@@ -101,7 +101,7 @@ function t:dfs()
     local n = 100
     local k = 10
     local g = RandomGraph:new(n, k)
-    assertnoloop(g:dfs{}:iterVertices())
+    assert(g:dfs{} == nil)
 
     local o = g:getRandomVertex()
     local tree = assert(g:dfs(o))
@@ -132,7 +132,7 @@ function t:bfs()
     local n = 5
     local k = 2
     local g = RandomGraph:new(n, k)
-    assertnoloop(g:bfs{}:iterVertices())
+    assert(g:bfs{} == nil)
 
     local o = g:getRandomVertex()
     local tree = assert(g:bfs(o))
