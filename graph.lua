@@ -1,9 +1,11 @@
--- Directed Graph with Self-Loops
+-- Undirected Graph with Self-Loops
 
 local Object = require "object"
+
 local Vertex = require "vertex"
 local Edge = require "edge"
 local Neighbourhood = require "neighbourhood"
+
 local Queue = require "queue"
 
 -----------------------

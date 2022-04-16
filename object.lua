@@ -1,30 +1,48 @@
 -- Object-Oriented Programming
+--
+-- Like Python, all classes inherit from the Object class
+-- You can create a class by calling its "inherit" method
+-- You can instantiate a class by calling its "new" method
+-- A class can have a constructor by having a "constructor" method
+-- The constructor will be called with the arguments passed to the "new" method
 
-local Object = {}
-setmetatable(Object, {
+local Object = setmetatable({}, {
     __name = "Object",
-    __parent = Object,
+    __isclass = true,
 })
 
+-- Create a class by inheritance
+-- Parameters
+--   self : table - class to be inherited from
+--   name : string or nil - name for new class
+-- Return values
+--   [1] : table - newly created class
 function Object:inherit(name)
     assert(self:isClass())
-    local mt = {
+    return setmetatable({}, {
         __index = self,
         __name = name,
         __parent = self,
-    }
-    local cls = setmetatable({}, mt)
-    return cls
+        __isclass = true,
+    })
 end
 
+-- Create an object by instantiation
+-- Parameters
+--   self : table - class to be instantiated
+--   ...  : any - arguments passed to constructor
+--                (if the class or some parent class
+--                defines one)
+-- Return values
+--   [1]  : table - newly instantiated object
 function Object:new(...)
     assert(self:isClass())
-    local mt = {
+    local obj = setmetatable({}, {
         __index = self,
         __name = self:getClassName(),
         __class = self,
-    }
-    local obj = setmetatable({}, mt)
+        __isclass = false,
+    })
     local init = self.constructor
     if init ~= nil then
         init(obj, ...)
@@ -37,31 +55,45 @@ local function getmetafield(obj, field)
     return mt and mt[field]
 end
 
+-- Get class of an object
+-- Parameters
+--   self : table - object
+-- Return values
+--   [1] : table - class of `self`
 function Object:getClass()
     return getmetafield(self, "__class")
 end
 
+-- Get parent of a class
+-- Parameters
+--   self : table - class
+-- Return values
+--   [1] : table - parent class of `self`
 function Object:getParentClass()
     return getmetafield(self, "__parent")
 end
 
+-- Get name of an object's class or of a class
+-- Parameters
+--   self : table - object or class
+-- Return values
+--   [1] : table - name of `self` (if a class) or
+--                 name of class of `self` (if an object)
 function Object:getClassName()
     return getmetafield(self, "__name")
 end
 
+-- Check if `self` is a class
+-- Parameters
+--   self : table - object or class
+-- Return values
+--   [1] : bool - whether `self` is a class or not
+--   [2] : string - error message of [1] is `false`
 function Object:isClass()
-    if self:getParentClass() then
+    if getmetafield(self, "__isclass") then
         return true
     else
         return false, "not a class"
-    end
-end
-
-function Object:isObject()
-    if self:getClass() then
-        return true
-    else
-        return false, "not an object"
     end
 end
 

@@ -4,16 +4,14 @@ local t = {}
 
 function t:all()
     assert(Object:getClassName() == "Object")
-    assert(Object:getParentClass() == Object)
+    assert(Object:getParentClass() == nil)
     assert(Object:isClass())
-    assert(not Object:isObject())
 
     local Animal = Object:inherit "Animal"
 
     assert(Animal:getClassName() == "Animal")
     assert(Animal:getParentClass() == Object)
     assert(Animal:isClass())
-    assert(not Animal:isObject())
 
     function Animal:constructor(name)
         self.name = name
@@ -27,7 +25,6 @@ function t:all()
     assert(Animal.count == 1)
     assert(giraffe:getClassName() == "Animal")
     assert(giraffe:getClass() == Animal)
-    assert(giraffe:isObject())
     assert(not giraffe:isClass())
     
     function Animal:say(something)
@@ -46,14 +43,12 @@ function t:all()
     assert(Dog:getClassName() == "Dog")
     assert(Dog:getParentClass() == Animal)
     assert(Dog:isClass())
-    assert(not Dog:isObject())
 
     local bob = Dog:new "Bob"
 
     assert(Animal.count == 2)
     assert(bob:getClassName() == "Dog")
     assert(bob:getClass() == Dog)
-    assert(bob:isObject())
     assert(not bob:isClass())
 
     function Dog:shout()
