@@ -2,8 +2,6 @@
 
 local Object = require "object"
 
-local Vertex = require "vertex"
-local Edge = require "edge"
 local Neighbourhood = require "neighbourhood"
 
 local Queue = require "queue"
@@ -11,6 +9,12 @@ local Queue = require "queue"
 -----------------------
 -- Class
 -----------------------
+
+-- Vertex : (any -> any)
+local Vertex = Object:inherit "Vertex"
+
+-- Edge : (any -> any)
+local Edge = Object:inherit "Edge"
 
 -- Graph : (Vertex -> Neighbourhood)
 local Graph = Object:inherit "Graph"
