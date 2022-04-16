@@ -1,27 +1,28 @@
 -- Object-Oriented Programming
 
-local Object = setmetatable({}, {
+local Object = {}
+setmetatable(Object, {
     __name = "Object",
-    __type = "class",
+    __parent = Object,
 })
 
 function Object:inherit(name)
-    assert(self:_isClass())
+    assert(self:isClass())
     local mt = {
         __index = self,
         __name = name,
-        __type = "class",
+        __parent = self,
     }
     local cls = setmetatable({}, mt)
     return cls
 end
 
 function Object:new(...)
-    assert(self:_isClass())
+    assert(self:isClass())
     local mt = {
         __index = self,
         __name = self:getClassName(),
-        __type = "object",
+        __class = self,
     }
     local obj = setmetatable({}, mt)
     local init = self.constructor
@@ -31,42 +32,33 @@ function Object:new(...)
     return obj
 end
 
+local function getmetafield(obj, field)
+    local mt = getmetatable(obj)
+    return mt and mt[field]
+end
+
 function Object:getClass()
-    assert(self:_isObject())
-    return getmetatable(self).__index
+    return getmetafield(self, "__class")
 end
 
 function Object:getParentClass()
-    assert(self:_isClass())
-    return getmetatable(self).__index
+    return getmetafield(self, "__parent")
 end
 
 function Object:getClassName()
-    return getmetatable(self).__name
+    return getmetafield(self, "__name")
 end
 
 function Object:isClass()
-    return self:_getMetaType() == "class"
-end
-
-function Object:isObject()
-    return self:_getMetaType() == "object"
-end
-
-function Object:_getMetaType()
-    return getmetatable(self).__type
-end
-
-function Object:_isClass()
-    if self:isClass() then
+    if self:getParentClass() then
         return true
     else
         return false, "not a class"
     end
 end
 
-function Object:_isObject()
-    if self:isObject() then
+function Object:isObject()
+    if self:getClass() then
         return true
     else
         return false, "not an object"

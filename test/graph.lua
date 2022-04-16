@@ -1,4 +1,5 @@
 local Graph = require "graph"
+local RandomGraph = require "rgraph"
 
 local t = {}
 
@@ -97,124 +98,63 @@ function t:removeDestinationVertex()
 end
 
 function t:dfs()
-    local g = Graph:new()
-    local n = 10
-    for i = 1, n do
-        local v = g:addVertex()
-        v.id = i
-    end
-    for v in g:iterVertices() do
-        for w in g:iterVertices() do
-            if v.id < w.id then
-                local e = g:addEdge(v, w)
-            end
-        end
-    end
+    local n = 100
+    local k = 10
+    local g = RandomGraph:new(n, k)
+    assertnoloop(g:dfs{}:iterVertices())
 
-    -- Do a DFS in the graph
-    local forest, ncomponents = g:dfs()
-    assert(forest)
-    assert((n == 0 and ncomponents == 0) or
-           (ncomponents >= 1 and ncomponents <= n))
+    local o = g:getRandomVertex()
+    local tree = assert(g:dfs(o))
 
-    -- Check that every vertex in the forest has
-    -- a reference to a vertex in the graph and
-    -- that every vertex in the graph is referenced
-    -- in exactly one vertex in the forest
-    local fn = 0
-    for fv in forest:iterVertices() do
-        local v = assert(fv.ref)
+    -- Check that the BFS tree has a subset
+    -- of the nodes of the original graph
+    -- including origin vertex
+    for tv in tree:iterVertices() do
+        local v = assert(tv.ref)
         assert(g:hasVertex(v))
-        assert(not v.traversed)
-        v.traversed = true
-        fn = fn + 1
+        assert(not v.added)
+        v.added = true
     end
-    assert(fn == n)
+    assert(o.added)
 
-    -- Check that every vertex is in a valid
-    -- connected component
-    local components = {}
-    for fv in forest:iterVertices() do
-        local v = fv.ref
-        local cid = assert(fv.cid)
-        assert(cid >= 1 and cid <= ncomponents)
-        if components[cid] == nil then
-            components[cid] = {}
-        end
-        components[cid][v] = true
-    end
-    assert(#components == ncomponents)
-
-    -- Check that vertices that are connected are
-    -- in the same connected component
-    for fv in forest:iterVertices() do
-        local v = fv.ref
-        for fw in forest:iterVertices() do
-            local w = fw.ref
-            local fe = forest:getEdge(fv, fw)
-            local e = g:getEdge(v, w)
-            if fe ~= nil then
-                assert(fe.ref == e)
-                assert(fv.cid == fw.cid)
-            end
-        end
-    end
-
-    -- Check that vertices from different connected
-    -- components are not connected with one another
-    for cid1, component1 in pairs(components) do
-        for cid2, component2 in pairs(components) do
-            if cid1 < cid2 then
-                for v1 in pairs(component1) do
-                    for v2 in pairs(component2) do
-                        assert(g:getEdge(v1, v2) == nil)
-                    end
-                end
-            end
+    -- Check that every edge in the tree
+    -- exists in the original graph
+    for tv in tree:iterVertices() do
+        local v = tv.ref
+        for tw, te in tree:iterEdges(tv) do
+            local w = tw.ref
+            assert(g:getEdge(v, w) ~= nil)
         end
     end
 end
 
-function t:dfs()
-    local g = Graph:new()
-    local n = 10
-    for i = 1, n do
-        local v = g:addVertex()
-        v.id = i
-    end
-    for v in g:iterVertices() do
-        for w in g:iterVertices() do
-            if v.id < w.id then
-                local e = g:addEdge(v, w)
-            end
-        end
-    end
+function t:bfs()
+    local n = 5
+    local k = 2
+    local g = RandomGraph:new(n, k)
+    assertnoloop(g:bfs{}:iterVertices())
 
-    -- Do a DFS in the graph
-    local forest = assert(g:dfs())
+    local o = g:getRandomVertex()
+    local tree = assert(g:bfs(o))
 
-    -- Check that every vertex in the forest has
-    -- a reference to a vertex in the graph and
-    -- that every vertex in the graph is referenced
-    -- in exactly one vertex in the forest
-    local fn = 0
-    for fv in forest:iterVertices() do
-        local v = assert(fv.ref)
+    -- Check that the BFS tree has a subset
+    -- of the nodes of the original graph
+    -- including origin vertex
+    for tv in tree:iterVertices() do
+        local v = assert(tv.ref)
         assert(g:hasVertex(v))
-        assert(not v.traversed)
-        v.traversed = true
-        fn = fn + 1
+        assert(v.added == nil)
+        v.added = true
     end
-    assert(fn == n)
+    assert(o.added)
 
-    -- Check that every edge in the forest
-    -- references an edge in the graph
-    for fv in forest:iterVertices() do
-        local v = fv.ref
-        for fw, fe in forest:iterEdges(fv) do
-            local w = fw.ref
-            local e = g:getEdge(v, w)
-            assert(fe.ref == e)
+    -- Check that every edge in the tree
+    -- exists in the original graph
+    for tv in tree:iterVertices() do
+        local v = assert(tv.ref)
+        for tw, te in tree:iterEdges(tv) do
+            local w = assert(tw.ref)
+            assert(g:getEdge(v, w))
         end
     end
 end

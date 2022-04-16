@@ -4,7 +4,7 @@ local t = {}
 
 function t:all()
     assert(Object:getClassName() == "Object")
-    assert(Object:getParentClass() == nil)
+    assert(Object:getParentClass() == Object)
     assert(Object:isClass())
     assert(not Object:isObject())
 
