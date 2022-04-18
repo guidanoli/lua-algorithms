@@ -36,13 +36,13 @@ end
 -- Do a breadth-first search on graph `g` from vertex `s`
 -- Returns a BFS tree where each vertex has a "ref" field
 -- that points to the original one
--- If vertex `v` is not in the graph, returns nil
+-- If vertex `s` is not in the graph, returns nil
 -- Parameters
 --   g   : Graph
 --   s   : Vertex - first vertex to be visited
 -- Return values
 --   [1] : Graph - BFS tree
---   [2] : Vertex - vertex in DFS tree that references `v`
+--   [2] : Vertex - vertex in BFS tree that references `s`
 function GraphSearch:bfs(g, s)
     if g:hasVertex(s) then
         local tree = Graph:new()
@@ -50,9 +50,12 @@ function GraphSearch:bfs(g, s)
         local treeVertexQueue = Queue:new() -- for TreeVertex only
         local ts = self:_addRef(tree, s)
         treeVertices[s] = ts
-        assert(treeVertexQueue:enqueue(ts))
-        while not treeVertexQueue:isEmpty() do
-            local tv = assert(treeVertexQueue:dequeue())
+        treeVertexQueue:enqueue(ts)
+        while true do
+            local ok, tv = treeVertexQueue:dequeue()
+            if not ok then
+                break -- queue is empty
+            end
             local v = tv.ref
             for w, e in g:iterEdges(v) do
                 local tw = treeVertices[w]
@@ -60,7 +63,7 @@ function GraphSearch:bfs(g, s)
                     tw = self:_addRef(tree, w)
                     treeVertices[w] = tw
                     assert(tree:addEdge(tv, tw))
-                    assert(treeVertexQueue:enqueue(tw))
+                    treeVertexQueue:enqueue(tw)
                 end
             end
         end
@@ -96,7 +99,11 @@ function GraphSearch:_dfsVisit(g, tree, visited, v)
 end
 
 -- Adds a vertex in graph `g` with "ref" pointing to `v`
+-- Parameters
 --   g   : Graph
+--   v : Vertex
+-- Return values
+--   [1] : Vertex - vertex added to `g`
 function GraphSearch:_addRef(g, v)
     local vref = g:addVertex()
     vref.ref = v
