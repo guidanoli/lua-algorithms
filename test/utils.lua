@@ -1,30 +1,81 @@
--- Utilities for testing
+-- Utility functions for testing
 
-function assertloop(yields, f, s, var)
+function loops(yields, f, s, var)
     local i = 0
     while true do
-        local vars = table.pack(f(s, var))
+        local vars = {f(s, var)}
         var = vars[1]
         if var == nil then
             break
         end
         i = i + 1
-        local yi = assert(yields[i], "looped too much")
-        for j, yij in ipairs(yi) do
-            local reason = ("yield #%d from loop #%d differs"):format(i, j)
-            assert(vars[j] == yij, reason)
+        local yi = yields[i]
+        if yi == nil then
+            return false, "looped too much"
+        end
+        local ok, k = eqtables(yi, vars)
+        if not ok then
+            return false, ("loop #%d, value #%s"):format(i, k)
         end
     end
-    assert(#yields == i, "looped too few")
+    if #yields == i then
+        return true
+    else
+        return false, "looped too few"
+    end
 end
 
-function assertnoloop(f, s, var)
-    assert(f(s, var) == nil, "looped once")
+function noloop(f, s, var)
+    if f(s, var) == nil then
+        return true
+    else
+        return false, "looped once"
+    end
 end
 
-function assertpcall(patt, f, ...)
+function pcallfind(patt, f, ...)
     local ok, ret = pcall(f, ...)
-    assert(not ok, "function did not throw")
-    local reason = ("%q not in %q"):format(patt, ret)
-    assert(ret:find(patt, 1, true), reason)
+    if ok then
+        if ret:find(patt, 1, true) then
+            return true
+        else
+            return false, ("%q not in %q"):format(patt, ret)
+        end
+    else
+        return false, "function did not throw"
+    end
+end
+
+function eq(a, b)
+    if type(a) == 'table' and type(b) == 'table' then
+        return eqtables(a, b)
+    else
+        if a == b then
+            return true
+        else
+            return false, ("%s != %s"):format(a, b)
+        end
+    end
+end
+
+function eqtables(a, b)
+    local k = difftables(a, b)
+    if k == nil then
+        local k = difftables(b, a)
+        if k == nil then
+            return true
+        else
+            return false, k
+        end
+    else
+        return false, k
+    end
+end
+
+function difftables(a, b)
+    for k, ak in pairs(a) do
+        if ak ~= b[k] then
+            return k
+        end
+    end
 end

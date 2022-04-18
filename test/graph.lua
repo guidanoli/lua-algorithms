@@ -10,7 +10,7 @@ function t:badArguments()
     assert(g:addEdge(nil, nil) == nil)
     assert(g:getEdge(nil, nil) == nil)
     g:removeEdge(nil, nil)
-    assertnoloop(g:iterEdges(nil))
+    assert(noloop(g:iterEdges(nil)))
 
     local v = g:addVertex()          -- G = <{v}, {}>
     assert(g:addEdge(v, nil) == nil)
@@ -23,20 +23,20 @@ end
 
 function t:addAndRemoveVertex()
     local g = Graph:new()            -- G = <V, E> = <{}, {}>
-    assertnoloop(g:iterVertices())
+    assert(noloop(g:iterVertices()))
     assert(g:hasVertex{} == false)
 
     local v = g:addVertex()          -- G = <{v}, {}>
     assert(g:hasVertex(v) == true)
-    assertloop({{v}}, g:iterVertices())
+    assert(loops({{v}}, g:iterVertices()))
 
     g:removeVertex(v)                -- G = <{}, {}>
     assert(g:hasVertex(v) == false)
 end
 
 local function assertnoedges(g, v, w)
-    assertnoloop(g:iterEdges(v))
-    assertnoloop(g:iterEdges(w))
+    assert(noloop(g:iterEdges(v)))
+    assert(noloop(g:iterEdges(w)))
     assert(g:getEdge(v, w) == nil)
     assert(g:getEdge(w, v) == nil)
 end
@@ -45,7 +45,7 @@ function t:addAndRemoveEdge()
     local g = Graph:new()            -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
-    assertnoloop(g:iterEdges(v))
+    assert(noloop(g:iterEdges(v)))
 
     local w = g:addVertex()          -- G = <{v, w}, {}>
     assert(v ~= w)
@@ -54,8 +54,8 @@ function t:addAndRemoveEdge()
     local e = g:addEdge(v, w)        -- G = <{v, w}, {e}>
     assert(g:getEdge(v, w) == e)
     assert(g:getEdge(w, v) == e)
-    assertloop({{w, e}}, g:iterEdges(v))
-    assertloop({{v, e}}, g:iterEdges(w))
+    assert(loops({{w, e}}, g:iterEdges(v)))
+    assert(loops({{v, e}}, g:iterEdges(w)))
 
     g:removeEdge(v, w)                -- G = <{v, w}, {}>
     assertnoedges(g, v, w)
