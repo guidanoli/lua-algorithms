@@ -5,7 +5,7 @@ local t = {}
 function t:all()
     local Animal = Class{name = "Animal"}
 
-    function Animal:new(name)
+    function Animal:init(name)
         self.name = name
         Animal.count = (Animal.count or 0) + 1
     end

@@ -8,8 +8,8 @@ local RandomGraph = Class{
     parent = Graph,
 }
 
-function RandomGraph:new(n, k)
-    Graph.new(self)
+function RandomGraph:init(n, k)
+    Graph.init(self)
     local v = {}
     for i = 1, n do
         local vi = self:addVertex()

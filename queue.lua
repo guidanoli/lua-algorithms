@@ -13,7 +13,7 @@ local Queue = Class{name = "Queue"}
 -- Public functions
 -----------------------
 
-function Queue:new()
+function Queue:init()
     self.first = 0
     self.last = -1
 end

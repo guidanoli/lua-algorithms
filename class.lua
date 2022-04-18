@@ -1,11 +1,11 @@
 -- Object-Oriented Programming Class
 
 local BaseClass = {}
-function BaseClass.new() end
+function BaseClass.init() end
 
 -- Create a class
 -- Classes can be instantiated by calling them like functions
--- Any argument is passed to the "new" method of the class
+-- Any argument is passed to the "init" method of the class
 -- Parameters
 --   t : table - class options
 --     name : string or nil - class name
@@ -25,7 +25,7 @@ return function(t)
                 __name = name,
                 __metatable = false,
             })
-            obj:new(...)
+            obj:init(...)
             return obj
         end
     })
