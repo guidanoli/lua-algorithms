@@ -54,7 +54,7 @@ end
 
 local function getmetafield(obj, field)
     local mt = getmetatable(obj)
-    return mt and mt[field]
+    return mt and rawget(mt, field)
 end
 
 -- Get class of an object
