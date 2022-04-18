@@ -11,6 +11,11 @@ local Object = setmetatable({}, {
     __isclass = true,
 })
 
+-- Default constructor
+function Object:constructor(...)
+    return ...
+end
+
 -- Create a class by inheritance
 -- Parameters
 --   self : table - class to be inherited from
@@ -35,6 +40,7 @@ end
 --                defines one)
 -- Return values
 --   [1]  : table - newly instantiated object
+--   ...  : any - values returned by the constructor
 function Object:new(...)
     assert(self:isClass())
     local obj = setmetatable({}, {
@@ -43,11 +49,7 @@ function Object:new(...)
         __class = self,
         __isclass = false,
     })
-    local init = self.constructor
-    if init ~= nil then
-        init(obj, ...)
-    end
-    return obj
+    return obj, obj:constructor(...)
 end
 
 local function getmetafield(obj, field)
