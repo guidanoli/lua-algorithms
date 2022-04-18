@@ -2,7 +2,7 @@
 
 local Object = require "object"
 
-local Neighbourhood = require "neighbourhood"
+local Neighbourhood = require "nbhood"
 
 local Queue = require "queue"
 
