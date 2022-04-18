@@ -1,9 +1,10 @@
 local Graph = require "graph"
+local RandomGraph = require "rgraph"
 
 local t = {}
 
 function t:badArguments()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = Graph()                -- G = <V, E> = <{}, {}>
     assert(g:hasVertex(nil) == false)
     g:removeVertex(nil)
     assert(g:addEdge(nil, nil) == nil)
@@ -21,7 +22,7 @@ function t:badArguments()
 end
 
 function t:addAndRemoveVertex()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = Graph()                -- G = <V, E> = <{}, {}>
     assert(noloop(g:iterVertices()))
     assert(g:hasVertex{} == false)
 
@@ -41,7 +42,7 @@ local function assertnoedges(g, v, w)
 end
 
 function t:addAndRemoveEdge()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = Graph()                -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
     assert(noloop(g:iterEdges(v)))
@@ -67,7 +68,7 @@ function t:addAndRemoveEdge()
 end
 
 function t:removeOriginVertex()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = Graph()                -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
 
@@ -82,7 +83,7 @@ function t:removeOriginVertex()
 end
 
 function t:removeDestinationVertex()
-    local g = Graph:new()            -- G = <V, E> = <{}, {}>
+    local g = Graph()                -- G = <V, E> = <{}, {}>
 
     local v = g:addVertex()          -- G = <{v}, {}>
 

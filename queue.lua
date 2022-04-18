@@ -1,19 +1,19 @@
 -- Directed Queue with Self-Loops
 
-local Object = require "object"
+local Class = require "class"
 
 -----------------------
 -- Class
 -----------------------
 
 -- Queue : (number -> any)
-local Queue = Object:inherit "Queue"
+local Queue = Class{name = "Queue"}
 
 -----------------------
 -- Public functions
 -----------------------
 
-function Queue:constructor()
+function Queue:new()
     self.first = 0
     self.last = -1
 end
@@ -51,10 +51,6 @@ end
 function Queue:isEmpty()
     return self.first > self.last
 end
-
------------------------
--- Private functions
------------------------
 
 -----------------------
 -- Return class

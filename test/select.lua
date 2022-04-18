@@ -33,7 +33,7 @@ end
 
 function t:partition()
     for i = 1, 1000 do
-        local t = RandomTable:new(100, 100)
+        local t = RandomTable(100, 100)
         local r = math.random(#t)
         local p = math.random(r)
         local q = math.ceil((p + r) / 2)
@@ -43,7 +43,7 @@ end
 
 function t:randomizedPartition()
     for i = 1, 1000 do
-        local t = RandomTable:new(100, 100)
+        local t = RandomTable(100, 100)
         local r = math.random(#t)
         local p = math.random(r)
         Select:randomizedPartition(t, p, r)

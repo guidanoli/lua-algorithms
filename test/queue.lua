@@ -3,7 +3,7 @@ local Queue = require "queue"
 local t = {}
 
 function t:all()
-    local q = Queue:new()
+    local q = Queue()
     q:enqueue(nil)
     local ok, v = q:dequeue()
     assert(ok and v == nil)

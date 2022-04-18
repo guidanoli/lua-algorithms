@@ -1,6 +1,6 @@
 -- Undirected Graph with Self-Loops
 
-local Object = require "object"
+local Class = require "class"
 
 local Neighbourhood = require "nbhood"
 
@@ -9,13 +9,13 @@ local Neighbourhood = require "nbhood"
 -----------------------
 
 -- Vertex : (any -> any)
-local Vertex = Object:inherit "Vertex"
+local Vertex = Class{name = "Vertex"}
 
 -- Edge : (any -> any)
-local Edge = Object:inherit "Edge"
+local Edge = Class{name = "Edge"}
 
 -- Graph : (Vertex -> Neighbourhood)
-local Graph = Object:inherit "Graph"
+local Graph = Class{name = "Graph"}
 
 -----------------------
 -- Public functions
@@ -25,8 +25,8 @@ local Graph = Object:inherit "Graph"
 -- Return values
 --   [1] : Vertex
 function Graph:addVertex()
-    local v = Vertex:new()
-    self[v] = Neighbourhood:new()
+    local v = Vertex()
+    self[v] = Neighbourhood()
     return v
 end
 
@@ -74,7 +74,7 @@ function Graph:addEdge(v, w)
     local vn = self[v]
     local wn = self[w]
     if vn and wn then
-        local e = Edge:new()
+        local e = Edge()
         vn:setEdge(w, e)
         wn:setEdge(v, e)
         return e
@@ -125,10 +125,6 @@ function Graph:iterEdges(v)
         return getmetatable -- noop
     end
 end
-
------------------------
--- Private functions
------------------------
 
 -----------------------
 -- Return class

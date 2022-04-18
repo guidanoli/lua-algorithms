@@ -1,10 +1,15 @@
 -- Random graph
 
+local Class = require "class"
 local Graph = require "graph"
 
-local RandomGraph = Graph:inherit "RandomGraph"
+local RandomGraph = Class{
+    name = "RandomGraph",
+    parent = Graph,
+}
 
-function RandomGraph:constructor(n, k)
+function RandomGraph:new(n, k)
+    Graph.new(self)
     local v = {}
     for i = 1, n do
         local vi = self:addVertex()

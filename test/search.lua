@@ -7,7 +7,7 @@ local t = {}
 function t:dfs()
     local n = 100
     local k = 10
-    local g = RandomGraph:new(n, k)
+    local g = RandomGraph(n, k)
     assert(GraphSearch:dfs(g, {}) == nil)
 
     local o = g:getRandomVertex()
@@ -38,7 +38,7 @@ end
 function t:bfs()
     local n = 5
     local k = 2
-    local g = RandomGraph:new(n, k)
+    local g = RandomGraph(n, k)
     assert(GraphSearch:bfs(g, {}) == nil)
 
     local o = g:getRandomVertex()

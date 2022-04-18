@@ -1,13 +1,13 @@
 -- Graph neighbourhood
 
-local Object = require "object"
+local Class = require "class"
 
 -----------------------
 -- Class
 -----------------------
 
 -- Neighbourhood : (Vertex -> Edge)
-local Neighbourhood = Object:inherit "Neighbourhood"
+local Neighbourhood = Class{name = "Neighbourhood"}
 
 -----------------------
 -- Public functions

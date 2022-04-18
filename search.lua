@@ -26,7 +26,7 @@ local GraphSearch = {}
 --   [2] : Vertex - vertex in DFS tree that references `s`
 function GraphSearch:dfs(g, s)
     if g:hasVertex(s) then
-        local tree = Graph:new()
+        local tree = Graph()
         local visited = {}
         local ts = assert(self:_dfsVisit(g, tree, visited, s))
         return tree, ts
@@ -45,9 +45,9 @@ end
 --   [2] : Vertex - vertex in BFS tree that references `s`
 function GraphSearch:bfs(g, s)
     if g:hasVertex(s) then
-        local tree = Graph:new()
+        local tree = Graph()
         local treeVertices = {} -- (GraphVertex -> TreeVertex)
-        local treeVertexQueue = Queue:new() -- for TreeVertex only
+        local treeVertexQueue = Queue() -- for TreeVertex only
         local ts = self:_addRef(tree, s)
         treeVertices[s] = ts
         treeVertexQueue:enqueue(ts)
